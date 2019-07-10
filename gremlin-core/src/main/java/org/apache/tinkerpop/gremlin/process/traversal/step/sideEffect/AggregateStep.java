@@ -49,6 +49,7 @@ public final class AggregateStep<S> extends AbstractStep<S, S> implements SideEf
     private Traversal.Admin<S, Object> aggregateTraversal = null;
     private String sideEffectKey;
     private TraverserSet<S> barrier = new TraverserSet<>();
+    private boolean isDone = false;
 
     public AggregateStep(final Traversal.Admin traversal, final String sideEffectKey) {
         super(traversal);
@@ -112,6 +113,9 @@ public final class AggregateStep<S> extends AbstractStep<S, S> implements SideEf
 
     @Override
     public void processAllStarts() {
+        if (this.isDone) {
+            return;
+        }
         if (this.starts.hasNext()) {
             final BulkSet<Object> bulkSet = new BulkSet<>();
             while (this.starts.hasNext()) {
@@ -122,6 +126,7 @@ public final class AggregateStep<S> extends AbstractStep<S, S> implements SideEf
             }
             this.getTraversal().getSideEffects().add(this.sideEffectKey, bulkSet);
         }
+        this.isDone = true;
     }
 
     @Override
